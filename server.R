@@ -67,7 +67,7 @@ shiny::shinyServer(function(input, output, session) {
                     timeFormat="%Y-%m-%d")
   
   ## initialise reactive values
-  ddate <- max(coverage$date)
+  ddate <- min(coverage$date)
   agg <- 'Day'
   subs <- coverage[coverage$date==as.character(ddate),]
   subs$Covered <- subs[[agg]]
@@ -154,7 +154,7 @@ shiny::shinyServer(function(input, output, session) {
   
   ## data tab
   output$data <- DT::renderDataTable({
-    datatable(coverage[,colnames(coverage)%in%c("cases","samples","date","LTLA19CD","LTLA19NM", "Day", "Week", "Month")], filter = 'top',options = list("pageLength" = 500),rownames=F)
+    DT::datatable(coverage[,colnames(coverage)%in%c("cases","samples","date","LTLA19CD","LTLA19NM", "Day", "Week", "Month")], filter = 'top',options = list("pageLength" = 500),rownames=F)
   })
   
   ## download button
