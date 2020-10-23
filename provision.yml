@@ -1,0 +1,9 @@
+packages:
+  - data.table
+  - dplyr
+  - DT
+  - leaflet
+  - lubridate
+  - shiny
+  - shinyjs
+  
