@@ -45,7 +45,7 @@ shinyUI(
                                   animate = animationOptions(interval = 50, loop = F)),
                       radioButtons(inputId='ti_aggregation',choices = c('Day','Week','Month'),selected = 'Day',label='Aggregation'),align='center'
                ),
-               column(8, id = "plot",leafletOutput( 'map', width = "100%", height = "1000px"), align="left")
+               column(8, id = "plot",leaflet::leafletOutput( 'map', width = "100%", height = "1000px"), align="left")
       ),
       tabPanel("Data",
                downloadButton("save_data", "Download data"),
