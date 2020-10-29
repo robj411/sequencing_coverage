@@ -47,7 +47,7 @@ if(file.exists('datasets/la_shape.Rds')){
   shp <- readRDS('datasets/la_shape.Rds')
 }else{
   # set the URL from where the file can be collected
-  geojson_url <- "https://opendata.arcgis.com/datasets/ae90afc385c04d869bc8cf8890bd1bcd_4.geojson"
+  geojson_url <- 'https://opendata.arcgis.com/datasets/3a4fa2ce68f642e399b4de07643eeed3_0.geojson'
   # set the file path where we'll download to
   file_path <- "regions.geojson"
   # download from the URL to the filepath specified
@@ -74,14 +74,14 @@ shiny::shinyServer(function(input, output, session) {
   agg <- 'Day'
   subs <- coverage[coverage$date==as.character(ddate),]
   subs$Covered <- subs[[agg]]
-  shp$Covered <- sapply(shp$lad17cd,function(x){
+  shp$Covered <- sapply(shp$lad19cd,function(x){
     if(as.character(x)%in%subs$LTLA19CD){
       subs$Covered[subs$LTLA19CD==as.character(x)]
     }else{
       NA
     }})
   shp$labl  <- with(shp@data, paste(
-    "<p> <b>", lad17nm, "</b> </br>",
+    "<p> <b>", lad19nm, "</b> </br>",
     "Coverage:", Covered,
     "</p>"))
   pal <- colorNumeric("Blues", 
@@ -107,7 +107,7 @@ shiny::shinyServer(function(input, output, session) {
   wide <<- dcast(data.table(coverage),
                  formula=LTLA19CD~date,
                  value.var = agg)
-  la_order <<- match(shp$lad17cd,wide$LTLA19CD)
+  la_order <<- match(shp$lad19cd,wide$LTLA19CD)
   
   
   ## observe input events
@@ -121,7 +121,7 @@ shiny::shinyServer(function(input, output, session) {
   #   wide <<- dcast(data.table(coverage),
   #                 formula=LTLA19CD~date,
   #                 value.var = agg)
-  #   la_order <<- match(shp$lad17cd,wide$LTLA19CD)
+  #   la_order <<- match(shp$lad19cd,wide$LTLA19CD)
   # })
   observeEvent({
     input$ti_window
@@ -136,7 +136,7 @@ shiny::shinyServer(function(input, output, session) {
     }
     shp$Covered <- wide[[ddate]][la_order]
     shp$labl  <- with(shp@data, paste(
-      "<p> <b>", lad17nm, "</b> </br>",
+      "<p> <b>", lad19nm, "</b> </br>",
       "Coverage:", Covered,
       "</p>"))
     pal <- colorNumeric("Blues", 
