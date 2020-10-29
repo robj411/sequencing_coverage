@@ -7,8 +7,13 @@
 ## in LTLAs and the sequences' corresponding weights
 
 ## TO USE
+##
 ## Rscript compute_weights.R --outroot a0- --postcode postcode_to_la.csv --days 14
-## 
+##
+## outroot becomes a prefix to output files
+## postcode is the name (including path) of the file containing postcodes and LAs
+## days is the number of days prior over which to sum the numbers of cases and samples
+##
 
 #######################################################################
 ## function from https://coronavirus-staging.data.gov.uk/details/developers-guide#params-page
