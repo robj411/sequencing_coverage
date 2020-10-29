@@ -1,6 +1,7 @@
 library(data.table)
 library(dplyr)
 library(DT)
+library(ggplot2)
 library(leaflet)
 library(lubridate)
 library(shiny)
@@ -10,35 +11,35 @@ library(shinyjs)
 if(file.exists('datasets/coverage.Rds')){
   coverage <- readRDS('datasets/coverage.Rds')
 }else{
-  coverage <- read.csv('../a0-coverage.csv',stringsAs=F)
+  coverage <- read.csv('datasets/a0-coverage.csv',stringsAs=F)
   coverage$Day <- round(coverage$coverage,1)
-  coverage$Week <- 0
-  coverage$Month <- 0
+  #coverage$Week <- 0
+  #coverage$Month <- 0
   coverage$date <- as.Date(coverage$date)
   coverage$cases <- as.numeric(coverage$cases)
   coverage <- subset(coverage,!is.na(date))
-  for(la in 1:length(unique(coverage$LTLA19CD))){
-    laids <- which(coverage$LTLA19CD==unique(coverage$LTLA19CD)[la])
-    lasub <- coverage[laids,]
-    week_case <- sapply(1:nrow(lasub),function(x){
-      d <- lasub$date[x]; 
-      keepd <- lasub$date <= (3+d) & lasub$date >= (-3+d); 
-      cases <- lasub$cases[keepd];
-      samples <- lasub$samples[keepd]; 
-      sum(samples,na.rm=T)/sum(as.numeric(cases),na.rm=T)
-    })
-    week_case[week_case>1] <- 1
-    coverage$Week[laids] <- round(week_case,1)
-    month_case <- sapply(1:nrow(lasub),function(x){
-      d <- lasub$date[x]; 
-      keepd <- lasub$date <= (15+d) & lasub$date >= (-15+d); 
-      cases <- lasub$cases[keepd];
-      samples <- lasub$samples[keepd]; 
-      sum(samples,na.rm=T)/sum(as.numeric(cases),na.rm=T)
-    })
-    month_case[month_case>1] <- 1
-    coverage$Month[laids] <- round(month_case,1)
-  }
+  # for(la in 1:length(unique(coverage$LTLA19CD))){
+  #   laids <- which(coverage$LTLA19CD==unique(coverage$LTLA19CD)[la])
+  #   lasub <- coverage[laids,]
+  #   week_case <- sapply(1:nrow(lasub),function(x){
+  #     d <- lasub$date[x]; 
+  #     keepd <- lasub$date <= (3+d) & lasub$date >= (-3+d); 
+  #     cases <- lasub$cases[keepd];
+  #     samples <- lasub$samples[keepd]; 
+  #     sum(samples,na.rm=T)/sum(as.numeric(cases),na.rm=T)
+  #   })
+  #   week_case[week_case>1] <- 1
+  #   coverage$Week[laids] <- round(week_case,1)
+  #   month_case <- sapply(1:nrow(lasub),function(x){
+  #     d <- lasub$date[x]; 
+  #     keepd <- lasub$date <= (15+d) & lasub$date >= (-15+d); 
+  #     cases <- lasub$cases[keepd];
+  #     samples <- lasub$samples[keepd]; 
+  #     sum(samples,na.rm=T)/sum(as.numeric(cases),na.rm=T)
+  #   })
+  #   month_case[month_case>1] <- 1
+  #   coverage$Month[laids] <- round(month_case,1)
+  # }
   saveRDS(coverage,'datasets/coverage.Rds')
 }
 
@@ -65,6 +66,8 @@ shiny::shinyServer(function(input, output, session) {
                     max = max(coverage$date),
                     value=max(coverage$date),
                     timeFormat="%Y-%m-%d")
+  updateSelectizeInput(session,inputId='ti_la',label='LTLA',choices=c('',as.character(unique(coverage$LTLA19NM))),
+                       selected='')
   
   ## initialise reactive values
   ddate <- min(coverage$date)
@@ -101,23 +104,28 @@ shiny::shinyServer(function(input, output, session) {
     map_lad  
   })
   
+  wide <<- dcast(data.table(coverage),
+                 formula=LTLA19CD~date,
+                 value.var = agg)
+  la_order <<- match(shp$lad17cd,wide$LTLA19CD)
+  
   
   ## observe input events
   
   ## render map ########################################################
   ## visualise map
-  observeEvent({
-    input$ti_aggregation
-  },{
-    agg <- input$ti_aggregation
-    wide <<- dcast(data.table(coverage),
-                  formula=LTLA19CD~date,
-                  value.var = agg)
-    la_order <<- match(shp$lad17cd,wide$LTLA19CD)
-  })
+  # observeEvent({
+  #   input$ti_aggregation
+  # },{
+  #   agg <- input$ti_aggregation
+  #   wide <<- dcast(data.table(coverage),
+  #                 formula=LTLA19CD~date,
+  #                 value.var = agg)
+  #   la_order <<- match(shp$lad17cd,wide$LTLA19CD)
+  # })
   observeEvent({
     input$ti_window
-    input$ti_aggregation
+    #input$ti_aggregation
   },{
     ddate <- as.character(input$ti_window)
     new_zoom <- 6
@@ -150,6 +158,31 @@ shiny::shinyServer(function(input, output, session) {
     
     #})
     
+  })
+  
+  ## line plot
+  observeEvent({
+    input$ti_la
+  },{
+    la_name <- input$ti_la
+    covla <- subset(coverage,LTLA19NM==la_name)
+    covla$coverage <- covla$coverage*100
+    mdf <- reshape2::melt(covla[,colnames(covla)%in%c('date','cases','samples','coverage')],id.vars="date")
+    
+    output$lines <- renderPlot({
+      ggplot(mdf, aes( x=date, y=value, colour=variable, group=variable )) + 
+        geom_line() +
+        scale_color_manual(values=c("cases"="navyblue","samples"="hotpink","coverage"="darkorange")) +
+        scale_linetype_manual(values=c("cases"="solid","samples"="solid","coverage"="solid")) +
+        xlab('Date') + ylab('Count (for samples and cases); percent (for coverage)') + 
+        theme(axis.text=element_text(size=12),axis.title=element_text(size=14) ,
+              panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+              panel.background = element_blank(),
+              legend.position='top', 
+              legend.justification='left',
+              legend.title=element_blank(), 
+              legend.text=element_text(size=12)) 
+    })
   })
   
   ## data tab
