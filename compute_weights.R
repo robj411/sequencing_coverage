@@ -276,7 +276,7 @@ coverage2week$coverage[ is.infinite( coverage2week$coverage ) ] <- NA
 coverage2week$coverage[ is.nan( coverage2week$coverage ) ] <- NA 
 coverage2week$coverage <- pmin ( 1, coverage2week$coverage )
 #saveRDS( coverage2week, file = paste0(outroot,'coverage.rds') )
-covfile <- paste0(outroot,'coverage.csv')
+covfile <- paste0(outroot,'coverage-',today(),'.csv')
 write.csv( coverage2week, file = covfile, row.names=FALSE, 
            quote=FALSE)
 cat(paste0(' -- Coverage written to ',covfile,' \n'))
@@ -307,7 +307,7 @@ weightdfs = lapply( phedfs , function( .phedf ){
   data.frame( central_sample_id  = .phedf$central_sample_id, coverage_weight = unname( ws ) , stringsAsFactors=FALSE )
 })
 wdf = do.call( rbind, weightdfs )
-weightfile <- paste0(outroot,'weightsdf.csv') 
+weightfile <- paste0(outroot,'weightsdf-',today(),'.csv') 
 write.csv(  wdf, quote=F, row.names=F , file = weightfile) 
 cat(paste0(' -- Weights written to ',weightfile,' \n'))
 
