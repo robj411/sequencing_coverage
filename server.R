@@ -8,7 +8,7 @@ library(shiny)
 library(shinyjs)
 
 
-if(file.exists('datasets/coverage.Rds')){
+if(file.exists('datasets/coverage.Rds') & file.info('datasets/a0-coverage.csv')$mtime < file.info('datasets/coverage.Rds')$mtime){
   coverage <- readRDS('datasets/coverage.Rds')
 }else{
   coverage <- read.csv('datasets/a0-coverage.csv',stringsAs=F)
@@ -60,7 +60,10 @@ map <- leaflet::leaflet()# %>%
 
 
 shiny::shinyServer(function(input, output, session) {
-  ## initialise checkboxes
+  dte <- file.info('datasets/coverage.Rds')$mtime
+  output$date_text <- renderText({ 
+    paste0("Metadata date: ", year(dte),'-',month(dte),'-',day(dte))
+  })
   updateSliderInput(session,inputId = "ti_window", label = "Select date",
                     min = min(coverage$date),
                     max = max(coverage$date),

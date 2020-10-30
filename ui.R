@@ -32,6 +32,7 @@ shinyUI(
         #     )
        # )
         ),
+      textOutput("date_text"),
     tags$hr(style="background: #cccccc; height: 4px;")
     ),
     tabsetPanel(
