@@ -60,9 +60,8 @@ map <- leaflet::leaflet()# %>%
 
 
 shiny::shinyServer(function(input, output, session) {
-  dte <- file.info('datasets/coverage.Rds')$mtime
   output$date_text <- renderText({ 
-    paste0("Metadata date: ", year(dte),'-',month(dte),'-',day(dte))
+    paste0("Metadata date: ", max(coverage$date))
   })
   updateSliderInput(session,inputId = "ti_window", label = "Select date",
                     min = min(coverage$date),
