@@ -121,7 +121,11 @@ for(i in 1:2){
 pcdf$postcode <- tolower(pcdf$postcode)
 
 cat(' -- Reading metadata;\n')
-phedf = read.csv('/cephfs/covid/bham/artifacts/published/majora.latest.metadata.tsv',sep='\t', stringsAs=FALSE)
+path <- '/cephfs/covid/bham/results/phylogenetics/latest/alignments/'
+ext <- list.files(path)
+# alignment: 
+md_fn = paste0(path,ext[grepl('metadata',ext)&grepl('all',ext)])
+phedf = read.csv(md_fn, stringsAs=FALSE)
 
 # supplement/replace with phe postcodes
 if(!is.null(path_to_phe_data)){
@@ -129,10 +133,10 @@ if(!is.null(path_to_phe_data)){
   phe_file <- phe_files[which.max(file.mtime(paste0(path_to_phe_data,phe_files)))]
   phedf2 = read.csv( paste0(path_to_phe_data,phe_file) , stringsAs=FALSE)
   phedf2 <- subset(phedf2,central_sample_id%in%phedf$central_sample_id)
-  phedf$adm2_private[match(phedf2$central_sample_id,phedf$central_sample_id)] <- phedf2$outer_postcode
+  phedf$outer_postcode[match(phedf2$central_sample_id,phedf$central_sample_id)] <- phedf2$outer_postcode
 }
 
-phedf$outerpostcode <- tolower(phedf$adm2_private)
+phedf$outerpostcode <- tolower(phedf$outer_postcode)
 
 #phedf$date <- dmy( phedf$sampledate  )
 cat(' -- Extracting date from metadata;\n')
@@ -164,7 +168,7 @@ for(i in 1:(maxlen-2)){
 }
 missing2 <- sum(phedf$outerpostcode=='') - missing1
 cat(paste0(sum(missing)+missing2,' postcodes were not matched\n'))
-cat(sort(unique(phedf$adm2_private[missing0])))
+cat(sort(unique(phedf$outer_postcode[missing0])))
 cat('\n')
 
 phedf$ltlacd = pcdf$LTLA19CD[ match( phedf$outerpostcode, pcdf$postcode) ]
