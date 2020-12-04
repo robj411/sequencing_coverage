@@ -248,6 +248,7 @@ if(sequential){
 }else{
   casesdf <- get_paginated_data(query_filters, structure)
 }
+casesdf$cases[is.na(casesdf$cases)] <- 0
 if(!file.exists('api_store.Rds')) saveRDS(casesdf,'api_store.Rds')
 
 ## read in and update store
@@ -261,7 +262,8 @@ cat(paste0(' -- Cases by LA and date written to api_store.Rds \n'))
 cat(' -- Joining sample data to case data by postcode;\n')
 ## samples over confirmed 
 dates = sort( unique( as.Date( casesdf$date )  )  )
-dates1 <- dates [ dates > as.Date('2020-03-14' ) ]
+# start at 21 to avoid zero cases
+dates1 <- dates [ dates > as.Date('2020-03-21' ) ]
 dates2 <- decimal_date(dates1)
 #w = 14
 
@@ -393,7 +395,8 @@ coverage2week$lamn_weight <- weights[cbind(la_order,wk_order)]
 ## by la
 la_samples <- sapply(las,function(x)sum(subset(coverage2week,LTLA19CD==x)$samples))
 la_cases <- sapply(las,function(x)sum(subset(coverage2week,LTLA19CD==x)$cases))
-la_cases <- la_cases/(sum(la_cases)/sum(la_samples))
+la_cases <- la_cases/(sum(la_cases,na.rm=T)/sum(la_samples,na.rm=T))
+la_cases[la_samples==0] <- 0
 la_weights <- data.frame(LTLA19CD=las,la_weight=la_cases/la_samples)
 
 ## by week
