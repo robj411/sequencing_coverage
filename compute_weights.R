@@ -424,7 +424,7 @@ weighted_phedf <- left_join(weighted_phedf,
                             coverage2week[,colnames(coverage2week)%in%c('lamn_weight','la_weight','wk_weight','mn_weight','LTLA19CD','date')],
                             by=c('LTLA19CD','date'))
 weighted_phedf <- left_join(weighted_phedf,wdf,by='central_sample_id')
-saveRDS(weighted_phedf,'variantAnalysis/weight_by_week_la.Rds')
+saveRDS(weighted_phedf,'weight_by_week_la.Rds')
 
 write.csv(weighted_phedf[,colnames(weighted_phedf)%in%c('lamn_weight','la_weight','wk_weight','mn_weight','central_sample_id')],
           'weight_options.csv',row.names = F)
