@@ -295,7 +295,7 @@ saveRDS( ltla2covg, file = paste0(outroot,'ltla2covg.rds') )
 coverage2week<- do.call( rbind , lapply( ltlacds , function(cd){
   x = ltla2covg[[cd]]
   x$LTLA19CD = cd
-  x$LTLA19NM = ltlacd2ltla[cd][1]
+  x$LTLA19NM = ltlacd2ltla[cd]
   x
 }))
 coverage2week$coverage[ is.infinite( coverage2week$coverage ) ] <- NA
@@ -335,6 +335,28 @@ wdf = do.call( rbind, weightdfs )
 weightfile <- paste0(outroot,'weightsdf-',today(),'.csv') 
 write.csv(  wdf, row.names=F , file = weightfile) 
 cat(paste0(' -- Weights written to ',weightfile,' \n'))
+
+dfsubset <- sapply(phedfs,function(x)sum(!is.na(x$ltlacd))>0)
+weightdfs = lapply( c(phedfs[dfsubset]) , function( .phedf ){
+  #.phedf <- .phedf [ !duplicated( .phedf$patientid ) , ]
+  las <- .phedf$ltlacd
+  ulas <- unique(las)[!is.na(unique(las))]
+  d = .phedf$date[ 1 ]
+  coverage2weekcov <- coverage2week$coverage[ coverage2week$date==d]
+  coverage2weekla <- coverage2week$LTLA19CD[coverage2week$date==d]
+  if(length(coverage2weekcov)>0){
+  data.frame(ltlacd=sapply(ulas,function(cd)rep(cd,sum(coverage2weekla==cd))),
+             weight=sapply(ulas,function(cd){
+               1/coverage2weekcov[which(coverage2weekla==cd)] 
+               }),date=as.character(d))
+  }else{
+    NULL
+    }
+}
+)
+wdf = do.call( rbind, weightdfs )
+weightfile <- paste0(outroot,'laweightsdf-',today(),'.csv') 
+write.csv(  wdf, row.names=F , file = weightfile) 
 
 # '
 # for each date
