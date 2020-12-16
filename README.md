@@ -64,10 +64,4 @@ v\_{i,j}/v^\*](https://latex.codecogs.com/png.latex?w_%7Bi%2Cj%7D%20%3D%20v_%7Bi
 "w_{i,j} = v_{i,j}/v^*")  
 and
 ![v^\*=\\text{mean}\_j(v\_{i,j})](https://latex.codecogs.com/png.latex?v%5E%2A%3D%5Ctext%7Bmean%7D_j%28v_%7Bi%2Cj%7D%29
-"v^*=\\text{mean}_j(v_{i,j})"). NB: this normalisation is localised to a
-single day; the ![j](https://latex.codecogs.com/png.latex?j "j")
-indexing the mean in the definition of
-![v^\*](https://latex.codecogs.com/png.latex?v%5E%2A "v^*") means the
-average is taken using sequences sampled on the day
-![j](https://latex.codecogs.com/png.latex?j "j"), not the two weeks
-leading up to ![j](https://latex.codecogs.com/png.latex?j "j").
+"v^*=\\text{mean}_j(v_{i,j})"). 
